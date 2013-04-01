@@ -1,0 +1,20 @@
+from django.conf.urls import patterns, include, url
+from list.views import *
+# Uncomment the next two lines to enable the admin:
+from django.contrib import admin
+admin.autodiscover()
+
+urlpatterns = patterns('',
+    url(r'^$', 'writetime.views.index'),
+    url(r'^offer$', 'writetime.views.offer'),
+    url(r'^accept$', 'writetime.views.accept'),
+    # Examples:
+    # url(r'^$', 'writetime.views.home', name='home'),
+    # url(r'^writetime/', include('writetime.foo.urls')),
+
+    # Uncomment the admin/doc line below to enable admin documentation:
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+
+    # Uncomment the next line to enable the admin:
+    url(r'^admin/', include(admin.site.urls)),
+)
