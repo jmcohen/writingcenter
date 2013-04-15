@@ -6,25 +6,31 @@ from emails import sendConfirmEmail, sendNotifyEmail
 import urllib2
 import datetime
 
+def authenticate(request):
+	return redirect('http://dev.writetime.tigerapps.org/authenticate?url=' + request.url)
+
 @login_required
 def index(request):
-	appointments = Appointment.objects.filter(isActive=True).filter(time__gte=datetime.datetime.now()).order_by('time')
-	return render_to_response('writetime/index.html', {'appointments' : appointments, 'user' : request.user})
+	if request.REQUEST['user']:
+		appointments = Appointment.objects.filter(isActive=True).filter(time__gte=datetime.datetime.now()).order_by('time')
+		return render_to_response('index.html', {'appointments' : appointments, 'user' : request.GET['user']})
+	else:
+		return HttpResponse(request.url)
 
 @login_required
 def offer(request):
 	dates = [datetime.datetime.now() + datetime.timedelta(1) * i for i in range(10)]
-	return render_to_response('writetime/offer.html', {'times' : range(9, 22), 'dates' : dates, 'user' : request.user})
+	return render_to_response('offer.html', {'times' : range(9, 22), 'dates' : dates, 'user' : request.GET['user']})
 
 @login_required
 def accept(request, pk):
 	appointment = Appointment.objects.get(pk=pk)
-	return render_to_response('writetime/accept.html', {'appointment' : appointment, 'user' : request.user})
+	return render_to_response('accept.html', {'appointment' : appointment, 'user' : request.GET['user']})
 
 @login_required
 def submitOffer(request):
 	name = request.REQUEST['name']
-	netid = request.user.username
+	netid = request.REQUEST['user']
 	dateString = request.REQUEST['date']
 	timeString = request.REQUEST['time']
 	(year, month, day) = dateString.split('_')
@@ -37,7 +43,7 @@ def submitOffer(request):
 @login_required
 def submitAccept(request, pk):
 	name = request.REQUEST['name']
-	netid = request.user.username
+	netid = request.REQUEST['user']
 	if name and netid:
 		appointment = Appointment.objects.get(pk=pk)
 		appointment.isActive = False
@@ -54,5 +60,5 @@ def submitRemove(request, pk):
 	
 @login_required
 def authenticate(request):
-	return redirect(request.GET['url'] + "?user=" + request.user.username)
+	return redirect(request.GET['url'] + "?user=" + request.REQUEST['user'])
 	
